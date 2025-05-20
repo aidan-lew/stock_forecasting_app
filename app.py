@@ -1,9 +1,7 @@
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
-from forecasting_backend import get_stock_data, forecast_prices  # your existing functions
+from forecasting_backend import get_numeric_data, forecast_prices
 
-# ---- PAGE CONFIG ----
 st.set_page_config(
     page_title="Market Forecast",
     page_icon="📈",
@@ -11,7 +9,7 @@ st.set_page_config(
     initial_sidebar_state="auto"
 )
 
-# ---- CUSTOM THEME ----
+# ---- CUSTOM STYLING ----
 st.markdown("""
     <style>
         body {
@@ -38,11 +36,10 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# ---- TITLE ----
 st.title("💹 Financial Forecasting Dashboard")
 st.subheader("Confident. Professional. Data-Driven.")
 
-# ---- SIDEBAR INPUTS ----
+# ---- INPUTS ----
 with st.sidebar:
     st.header("🔍 Forecast Parameters")
     ticker = st.text_input("Enter Stock Ticker (e.g., AAPL)", "AAPL")
@@ -53,21 +50,22 @@ with st.sidebar:
 if submitted:
     with st.spinner("Fetching data and running forecast..."):
 
-        # Call your backend functions
-        historical_data = get_stock_data(ticker)
+        numeric_df = get_numeric_data(ticker)
         forecast_df = forecast_prices(ticker, days)
 
         st.success("Forecast complete!")
 
-        # ---- HISTORICAL DATA DISPLAY ----
-        st.subheader(f"📉 Historical Prices for {ticker}")
-        st.line_chart(historical_data.set_index("Date")["Close"])
+        # ---- DISPLAY HISTORICAL ----
+        st.subheader(f"📉 Historical Close Prices for {ticker}")
+        st.line_chart(numeric_df.set_index("Date")["Close"])
 
-        # ---- FORECASTED PRICES ----
+        # ---- DISPLAY FORECAST ----
         st.subheader(f"🔮 {days}-Day Forecast for {ticker}")
         st.line_chart(forecast_df.set_index("Date")["Forecast"])
 
-        # ---- NUMERIC RESULTS ----
-        st.subheader("📊 Forecast Data")
+        # ---- DATA TABLES ----
+        st.subheader("📊 Forecast Data Table")
         st.dataframe(forecast_df)
 
+        st.subheader("📋 Technical Indicators Snapshot")
+        st.dataframe(numeric_df.tail(10))
